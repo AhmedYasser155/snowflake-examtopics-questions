@@ -10,14 +10,13 @@
             margin: 20px;
             background-color: #f9f9f9;
             color: #333;
+            text-align: center; /* Center content */
         }
         h1 {
             color: #333;
-            text-align: center;
         }
         .search-container {
             margin-bottom: 20px;
-            text-align: center;
         }
         input[type="text"] {
             padding: 10px;
@@ -38,77 +37,34 @@
         button:hover {
             background-color: #0056b3;
         }
-        #total-questions {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .view-toggle {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .list-view, .card-view {
-            display: none; /* Start with both views hidden */
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            max-width: 600px;
-            margin: auto;
-        }
-        li {
-            margin: 10px 0;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: background 0.3s;
-        }
-        li:hover {
-            background: #e9f5fe;
-        }
-        .card-view {
-            display: none;
-            text-align: center;
-        }
         .card {
             display: inline-block;
             width: 500px;
-            margin: 10px;
             padding: 15px;
             background: white;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
-            transition: background 0.3s;
-            /* font size */
             font-size: 40px;
-        }
-        .card:hover {
-            background: #e9f5fe;
+            margin: 20px auto; /* Center the card */
         }
         .navigation {
             margin: 20px 0;
             display: flex;
-            justify-content: center; /* Center navigation buttons */
-            gap: 10px; /* Space between buttons */
+            justify-content: center;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
     <h1>Snowflake Exam Preparation</h1>
-    <p style="text-align: center;">Questions from 301 to 1098 that are not available in the free version</p>
+    <p>Questions from 301 to 1098 that are not available in the free version</p>
     <div class="search-container">
         <input type="text" id="search" placeholder="Search for questions..." />
-        <button id="clear-search">Clear Search</button>
+        <button id="go-to-question">Go to Question</button>
     </div>
-    <div id="total-questions"></div>
-    <div class="view-toggle">
-        <button id="list-view-btn">List View</button>
-        <button id="card-view-btn">Card View</button>
-    </div>
-    <ul id="links-list" class="list-view"></ul>
-    <div id="card-container" class="card-view"></div>
+
+    <div id="card-container"></div>
 
     <div class="navigation">
         <button id="prev-question" style="display:none;">Previous Question</button>
@@ -116,8 +72,7 @@
     </div>
 
     <script>
-        const links = `
-https://www.examtopics.com//discussions/snowflake/view/91234-exam-snowpro-core-topic-1-question-301-discussion/
+        const links = `https://www.examtopics.com//discussions/snowflake/view/91234-exam-snowpro-core-topic-1-question-301-discussion/
 https://www.examtopics.com//discussions/snowflake/view/91809-exam-snowpro-core-topic-1-question-302-discussion/
 https://www.examtopics.com//discussions/snowflake/view/93074-exam-snowpro-core-topic-1-question-303-discussion/
 https://www.examtopics.com//discussions/snowflake/view/90704-exam-snowpro-core-topic-1-question-304-discussion/
@@ -918,136 +873,65 @@ https://www.examtopics.com//discussions/snowflake/view/137674-exam-snowpro-core-
 https://www.examtopics.com//discussions/snowflake/view/137788-exam-snowpro-core-topic-1-question-1097-discussion/
 https://www.examtopics.com//discussions/snowflake/view/137677-exam-snowpro-core-topic-1-question-1098-discussion/`.trim().split("\n");
 
-        const linksList = document.getElementById("links-list");
         const cardContainer = document.getElementById("card-container");
         const searchInput = document.getElementById("search");
-        const totalQuestions = document.getElementById("total-questions");
-        const clearSearchButton = document.getElementById("clear-search");
         const prevQuestionBtn = document.getElementById("prev-question");
         const nextQuestionBtn = document.getElementById("next-question");
-        let currentQuestionIndex = 0;
+        let currentQuestionIndex = -1;
 
         // Function to extract question number from the link
         function extractQuestionNumber(link) {
             const match = link.match(/question-(\d+)/i);
-            return match ? `Question ${match[1]}` : "Unknown Question";
+            return match ? parseInt(match[1]) : null;
         }
 
-        // Function to display links in list view
-        function displayLinks(filter = "") {
-            linksList.innerHTML = ""; // Clear previous list
-            cardContainer.innerHTML = ""; // Clear card container
-            let count = 0; // To count displayed links
-
-            links.forEach(link => {
-                const questionNumber = extractQuestionNumber(link);
-                if (questionNumber.toLowerCase().includes(filter.toLowerCase())) {
-                    // List View
-                    const li = document.createElement("li");
-                    li.innerHTML = `<a href="${link.trim()}" target="_blank">${questionNumber}</a>`;
-                    linksList.appendChild(li);
-                    count++;
-                }
-            });
-
-            totalQuestions.innerText = `Total Questions: ${count}`; // Display total
-        }
-
-        // Function to display links in card view
-        function displayCards(filter = "") {
-            cardContainer.innerHTML = ""; // Clear card container
-            let count = 0; // To count displayed links
-
-            links.forEach((link, index) => {
-                const questionNumber = extractQuestionNumber(link);
-                if (questionNumber.toLowerCase().includes(filter.toLowerCase())) {
-                    // Card View
-                    const card = document.createElement("div");
-                    card.className = "card";
-                    card.innerHTML = `<a href="${link.trim()}" target="_blank">${questionNumber}</a>`;
-                    cardContainer.appendChild(card);
-                    count++;
-                }
-            });
-
-            totalQuestions.innerText = `Total Questions: ${count}`; // Display total
-        }
-
-        // Function to display next question
-        function showNextQuestion() {
-            currentQuestionIndex++;
-            displayCurrentQuestion();
-        }
-
-        // Function to display previous question
-        function showPrevQuestion() {
-            currentQuestionIndex--;
-            displayCurrentQuestion();
-        }
-
-        // Function to display current question based on the index
+        // Function to display the current question based on the index
         function displayCurrentQuestion() {
-            const filteredLinks = links.filter(link => {
-                const questionNumber = extractQuestionNumber(link);
-                return questionNumber.toLowerCase().includes(searchInput.value.toLowerCase());
-            });
-
-            if (filteredLinks.length > 0) {
-                if (currentQuestionIndex < 0) currentQuestionIndex = 0;
-                if (currentQuestionIndex >= filteredLinks.length) currentQuestionIndex = filteredLinks.length - 1;
-
-                const currentLink = filteredLinks[currentQuestionIndex];
+            if (currentQuestionIndex >= 0 && currentQuestionIndex < links.length) {
+                const currentLink = links[currentQuestionIndex];
                 const questionNumber = extractQuestionNumber(currentLink);
 
                 // Display the current question
-                cardContainer.innerHTML = `<div class="card" style="text-align:center;"><a href="${currentLink}" target="_blank">${questionNumber}</a></div>`;
+                cardContainer.innerHTML = `<div class="card"><a href="${currentLink}" target="_blank">Question ${questionNumber}</a></div>`;
 
                 // Show/hide navigation buttons
                 prevQuestionBtn.style.display = currentQuestionIndex === 0 ? "none" : "block";
-                nextQuestionBtn.style.display = currentQuestionIndex === filteredLinks.length - 1 ? "none" : "block";
+                nextQuestionBtn.style.display = currentQuestionIndex === links.length - 1 ? "none" : "block";
             }
         }
 
-        // Initial display of all links
-        displayLinks();
+        // Function to handle search and go to question
+        document.getElementById("go-to-question").addEventListener("click", () => {
+            const searchValue = parseInt(searchInput.value);
+            currentQuestionIndex = links.findIndex(link => extractQuestionNumber(link) === searchValue);
 
-        // Search functionality
-        searchInput.addEventListener("input", () => {
-            const filter = searchInput.value;
-            currentQuestionIndex = 0; // Reset index on search
-            displayLinks(filter);
-            displayCards(filter);
-            displayCurrentQuestion(); // Refresh current question display
-        });
-
-        // Clear search functionality
-        clearSearchButton.addEventListener("click", () => {
-            searchInput.value = "";
-            displayLinks();
-            currentQuestionIndex = 0; // Reset index
-            totalQuestions.innerText = `Total Questions: ${links.length}`; // Reset total display
-        });
-
-        // List view button functionality
-        document.getElementById("list-view-btn").addEventListener("click", () => {
-            linksList.style.display = "block";
-            cardContainer.style.display = "none";
-            currentQuestionIndex = 0; // Reset index on view change
-            displayLinks(searchInput.value); // Refresh list view
-        });
-
-        // Card view button functionality
-        document.getElementById("card-view-btn").addEventListener("click", () => {
-            linksList.style.display = "none";
-            cardContainer.style.display = "block";
-            currentQuestionIndex = 0; // Reset index on view change
-            displayCards(searchInput.value); // Refresh card view
-            displayCurrentQuestion(); // Show the first question
+            if (currentQuestionIndex !== -1) {
+                displayCurrentQuestion();
+                searchInput.value = ""; // Clear the search input
+            } else {
+                alert("Question not found!");
+            }
         });
 
         // Next and Previous question functionality
-        nextQuestionBtn.addEventListener("click", showNextQuestion);
-        prevQuestionBtn.addEventListener("click", showPrevQuestion);
+        nextQuestionBtn.addEventListener("click", () => {
+            if (currentQuestionIndex < links.length - 1) {
+                currentQuestionIndex++;
+                displayCurrentQuestion();
+            }
+        });
+
+        prevQuestionBtn.addEventListener("click", () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayCurrentQuestion();
+            }
+        });
+
+        // Default view when the page loads
+        cardContainer.innerHTML = `<div class="card">Search for a question to get started!</div>`;
     </script>
 </body>
 </html>
+
+
